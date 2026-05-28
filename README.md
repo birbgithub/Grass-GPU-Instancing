@@ -1,4 +1,4 @@
-<h1>**Grass Renderer - Unity GPU Instancing**</h1>
+<h1>Grass Renderer - Unity GPU Instancing</h1>
 
 *Generates and renders millions of small 3D objects in real time.*
 
