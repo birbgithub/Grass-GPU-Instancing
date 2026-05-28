@@ -7,4 +7,4 @@ Features
 - Compute Shader for blade positions and wind animation
 - Customizable map size, grass density, grass model, heightmap, wind speed/direction
 
-![Demo](media/demo.gif)
+![Demo](media/GrassDemo.gif)
