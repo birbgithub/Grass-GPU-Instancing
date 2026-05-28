@@ -1,0 +1,48 @@
+#pragma kernel InitialiseGrassPositions
+
+#include "SimplexNoise2D.hlsl"
+
+struct GrassData
+{
+    float4 position;
+    float2 worldUV;
+};
+
+RWStructuredBuffer<float4> _GrassDataBuffer;
+
+int _MapSize;
+float _Density;
+float _DisplacementStrength;
+
+Texture2D<float4> _HeightMap;
+SamplerState sampler_HeightMap;
+
+[numthreads(8,8,1)]
+void InitialiseGrassPositions (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x < uint(_MapSize) && id.y < uint(_MapSize))
+    {
+        // position
+        float4 pos = 0.0f;
+        pos.xz = (id.xy - 0.5f * float(_MapSize)) * (1.0f / _Density);  // scale for density
+
+        pos.xz += snoise_grad(pos.xz * 3.0f) * 0.05f; // slightly alter pos with noise
+
+        // length of blade of grass
+        float noise = abs(snoise(pos.xz * 0.12f));
+        pos.w = lerp(0.6f, 1.1f, noise);
+
+        // heightmap
+        float2 uv = pos.xz;
+        uv = id.xy;
+        uv.xy /= float(_MapSize);
+        uv.y = 1 - uv.y;
+        uv.x = 1 - uv.x;
+        float displacement = _HeightMap.SampleLevel(sampler_HeightMap, uv, 0).r;
+
+        pos.y += displacement * _DisplacementStrength;
+
+        _GrassDataBuffer[id.x + id.y * _MapSize] = pos;
+
+    }
+}
